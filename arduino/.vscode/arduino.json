@@ -1,6 +1,6 @@
 {
     "board": "arduino:avr:uno",
-    "programmer": "arduinoisp",
     "port": "COM5",
-    "sketch": "servo-pulse-range.ino"
+    "sketch": "arduino.ino",
+    "programmer": "arduinoisp"
 }
