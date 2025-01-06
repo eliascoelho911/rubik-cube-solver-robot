@@ -1,101 +1,107 @@
+#include "cube.h"
 #include <Adafruit_PWMServoDriver.h>
 #include <Wire.h>
 
-#define SERVO_FREQ 50
-
-#define L_HAND_SERVO_IDLE_PULSE 300
-#define L_HAND_SERVO_OFFSET_PULSE 180
-#define L_HAND_SERVO_CHANNEL 0
-
-#define R_HAND_SERVO_IDLE_PULSE 300
-#define R_HAND_SERVO_OFFSET_PULSE 180
-#define R_HAND_SERVO_CHANNEL 1
-
-#define L_GRIPPER_SERVO_OPPENED_PULSE 395
-#define L_GRIPPER_SERVO_CLOSED_PULSE 460
-#define L_GRIPPER_SERVO_CHANNEL 2
-
-#define R_GRIPPER_SERVO_OPPENED_PULSE 460
-#define R_GRIPPER_SERVO_CLOSED_PULSE 395
-#define R_GRIPPER_SERVO_CHANNEL 3
-
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+Cube cube = Cube();
 
 void setup() {
-  Serial.begin(9600);
-  Serial.println("Iniciando o robô resolutor de cubo mágico...");
+    Serial.begin(9600);
+    Serial.println("Iniciando o robô resolutor de cubo mágico...");
 
-  pwm.begin();
-  pwm.setOscillatorFrequency(27000000);
-  pwm.setPWMFreq(SERVO_FREQ);
+    cube.setup(5, 4, 1, 0);
 
-  delay(10);
+    delay(10);
 
-  moveTest();
+    cube.idle();
+
+    // Exibe memória restante
+    Serial.print("Memória restante: ");
+    Serial.println(freeMemory());
 }
 
 void loop() {}
 
-void moveCube(String moveNotation) {
-  if (moveNotation == "L") {
-    pwm.setPWM(L_GRIPPER_SERVO_CHANNEL, 0, L_GRIPPER_SERVO_CLOSED_PULSE);
-    delay(1000);
-    moveServo(L_HAND_SERVO_CHANNEL, 1);
-  } else if (moveNotation == "L'") {
-    moveServo(L_HAND_SERVO_CHANNEL, -1);
-  } else if (moveNotation == "R") {
-    moveServo(R_HAND_SERVO_CHANNEL, 1);
-  } else if (moveNotation == "R'") {
-    moveServo(R_HAND_SERVO_CHANNEL, -1);
-  } else {
-    moveServo(L_HAND_SERVO_CHANNEL, 0);
-    delay(1000);
-    pwm.setPWM(R_GRIPPER_SERVO_CHANNEL, 0, R_GRIPPER_SERVO_OPPENED_PULSE);
-    delay(1000);
-    moveServo(R_HAND_SERVO_CHANNEL, 0);
-  }
-}
+void runTest() {
+    Serial.println("Iniciando teste...");
 
-// Implementar trava de segurança para evitar colisões
-void moveServo(int channel, int direction) {
-  int pulse = calcPulse(channel, direction);
-  pwm.setPWM(channel, 0, pulse);
-  Serial.println("Movendo servo " + String(channel) + " para " +
-                 String(direction) + " com o pulso " + String(pulse));
-  delay(500);
-}
-
-int calcPulse(int channel, int direction) {
-  int idlePulse;
-  int offsetPulse;
-
-  if (channel == L_HAND_SERVO_CHANNEL) {
-    idlePulse = L_HAND_SERVO_IDLE_PULSE;
-    offsetPulse = L_HAND_SERVO_OFFSET_PULSE;
-  } else if (channel == R_HAND_SERVO_CHANNEL) {
-    idlePulse = R_HAND_SERVO_IDLE_PULSE;
-    offsetPulse = R_HAND_SERVO_OFFSET_PULSE;
-  }
-
-  int minPulse = idlePulse - offsetPulse;
-  int maxPulse = idlePulse + offsetPulse;
-
-  return map(direction, -1, 1, minPulse, maxPulse);
-}
-
-void moveTest() {
-  while (true) {
-    Serial.println("Digite o movimento: ");
-
-    while (Serial.available() == 0) {
+    cube.moveLeftGripper(true);
+    if (!askSuccess()) {
+        Serial.println("Teste falhou.");
+        cube.idle();
+        return;
     }
 
-    String moveNotation = Serial.readString();
-
-    if (moveNotation == "exit") {
-      return;
+    cube.moveLeftGripper(false);
+    if (!askSuccess()) {
+        Serial.println("Teste falhou.");
+        cube.idle();
+        return;
     }
 
-    moveCube(moveNotation);
-  }
+    cube.moveRightGripper(true);
+    if (!askSuccess()) {
+        Serial.println("Teste falhou.");
+        cube.idle();
+        return;
+    }
+
+    cube.moveRightGripper(false);
+    if (!askSuccess()) {
+        Serial.println("Teste falhou.");
+        cube.idle();
+        return;
+    }
+
+    cube.moveLeftHand(RIGHT);
+    if (!askSuccess()) {
+        Serial.println("Teste falhou.");
+        cube.idle();
+        return;
+    }
+
+    cube.moveLeftHand(LEFT);
+    if (!askSuccess()) {
+        Serial.println("Teste falhou.");
+        cube.idle();
+        return;
+    }
+
+    cube.moveLeftHand(MIDDLE);
+
+    cube.moveRightHand(RIGHT);
+    if (!askSuccess()) {
+        Serial.println("Teste falhou.");
+        cube.idle();
+        return;
+    }
+
+    cube.moveRightHand(LEFT);
+    if (!askSuccess()) {
+        Serial.println("Teste falhou.");
+        cube.idle();
+        return;
+    }
+
+    Serial.println("Teste concluído com sucesso.");
+    cube.idle();
+}
+
+bool askSuccess() {
+    Serial.println("O movimento foi bem sucedido? (s/n)");
+    while (true) {
+        if (Serial.available() > 0) {
+            char response = Serial.read();
+            if (response == 's') {
+                return true;
+            } else if (response == 'n') {
+                return false;
+            }
+        }
+    }
+}
+
+int freeMemory() {
+    extern int __heap_start, *__brkval;
+    int v;
+    return (int)&v - (__brkval == 0 ? (int)&__heap_start : (int)__brkval);
 }
