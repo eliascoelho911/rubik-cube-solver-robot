@@ -5,15 +5,16 @@
 
 class RobotServo {
   public:
-    RobotServo(const Adafruit_PWMServoDriver &pwm, const int pin, const int min,
+    RobotServo(Adafruit_PWMServoDriver &pwm, const int pin, const int min,
                const int max);
     void write(const int pulse);
+    void write(const int pulse, const int startPulse, float speed);
 
   private:
     int _pin;
     int _min;
     int _max;
-    Adafruit_PWMServoDriver _pwm;
+    Adafruit_PWMServoDriver &_pwm;
 };
 
 #endif // SERVO_H

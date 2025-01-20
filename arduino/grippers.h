@@ -5,10 +5,10 @@
 
 class Gripper {
   public:
-    Gripper(const Adafruit_PWMServoDriver &pwm, int pin);
+    Gripper(Adafruit_PWMServoDriver &pwm, const int pin);
     Gripper(const RobotServo servo);
-    void open();
-    void close();
+    void open(const bool slow = false);
+    void close(const bool slow = false);
 
   private:
     RobotServo _servo;

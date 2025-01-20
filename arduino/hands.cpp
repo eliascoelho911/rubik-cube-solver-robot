@@ -1,6 +1,6 @@
 #include "hands.h"
 
-LeftHand::LeftHand(const Adafruit_PWMServoDriver &pwm, const int pin)
+LeftHand::LeftHand(Adafruit_PWMServoDriver &pwm, const int pin)
     : Hand(RobotServo(pwm, pin, 120, 480)) {}
 
 void LeftHand::move(const int direction) {
@@ -13,7 +13,7 @@ void LeftHand::move(const int direction) {
     }
 }
 
-RightHand::RightHand(const Adafruit_PWMServoDriver &pwm, const int pin)
+RightHand::RightHand(Adafruit_PWMServoDriver &pwm, const int pin)
     : Hand(RobotServo(pwm, pin, 120, 480)) {}
 
 void RightHand::move(const int direction) {

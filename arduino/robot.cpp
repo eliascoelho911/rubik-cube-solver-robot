@@ -1,5 +1,5 @@
 #include "robot.h"
-#include "../util/serial.h"
+#include "serial.h"
 #include <Adafruit_PWMServoDriver.h>
 #include <Arduino.h>
 
@@ -8,13 +8,14 @@
 #define MAX_PULSE 10000
 #define MIN_PULSE 0
 
-Robot::Robot(const int lHand, const int rHand, const int lGripper,
-             const int rGripper)
-    : _pwm(Adafruit_PWMServoDriver()), _lHand(LeftHand(_pwm, lHand)),
-      _rHand(RightHand(_pwm, rHand)), _lGripper(Gripper(_pwm, lGripper)),
-      _rGripper(Gripper(_pwm, rGripper)) {
+Robot::Robot(Adafruit_PWMServoDriver &pwm, const int lHand, const int rHand,
+             const int lGripper, const int rGripper)
+    : _pwm(pwm), _lHand(LeftHand(pwm, lHand)), _rHand(RightHand(pwm, rHand)),
+      _lGripper(Gripper(pwm, lGripper)), _rGripper(Gripper(pwm, rGripper)) {}
 
+void Robot::begin() {
     _pwm.begin();
+    _pwm.setOscillatorFrequency(27000000);
     _pwm.setPWMFreq(SERVO_FREQ);
 }
 
@@ -23,11 +24,15 @@ void Robot::receiveCube() {
     _rHand.move(0);
     _lGripper.open();
     _rGripper.open();
-    awaitInput("Place the cube in the robot's hands and press any key to "
-               "continue...");
 
-    _lGripper.close();
-    _rGripper.close();
+    Serial.println("Place the cube in the robot's hands and await...");
+    delay(2000l);
+    Serial.println("Starting to close the grippers...");
+    delay(1000l);
+
+    _lGripper.close(true);
+    delay(1000l);
+    _rGripper.close(true);
 
     Serial.println("Cube positioned!");
 }

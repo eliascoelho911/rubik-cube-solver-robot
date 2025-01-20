@@ -15,13 +15,13 @@ class Hand {
 
 class LeftHand : public Hand {
   public:
-    LeftHand(const Adafruit_PWMServoDriver &pwm, const int pin);
+    LeftHand(Adafruit_PWMServoDriver &pwm, const int pin);
     void move(const int direction);
 };
 
 class RightHand : public Hand {
   public:
-    RightHand(const Adafruit_PWMServoDriver &pwm, const int pin);
+    RightHand(Adafruit_PWMServoDriver &pwm, const int pin);
     void move(const int direction);
 };
 
