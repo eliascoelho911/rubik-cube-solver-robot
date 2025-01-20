@@ -2,14 +2,19 @@
 #include <Adafruit_PWMServoDriver.h>
 #include <Wire.h>
 
-RobotServo::RobotServo(Adafruit_PWMServoDriver pwm, int pin, int min, int max)
+RobotServo::RobotServo(const Adafruit_PWMServoDriver &pwm, const int pin,
+                       const int min, const int max)
     : _pwm(pwm), _pin(pin), _min(min), _max(max) {}
 
-void RobotServo::write(int pulse) {
-    if (pulse < _min)
-        pulse = _min;
-    if (pulse > _max)
-        pulse = _max;
+void RobotServo::write(const int pulse) {
+    if (pulse < _min) {
+        _pwm.setPWM(_pin, 0, _min);
+        return;
+    }
+    if (pulse > _max) {
+        _pwm.setPWM(_pin, 0, _max);
+        return;
+    }
 
     _pwm.setPWM(_pin, 0, pulse);
 }

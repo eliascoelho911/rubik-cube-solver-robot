@@ -5,8 +5,9 @@
 
 class RobotServo {
   public:
-    RobotServo(Adafruit_PWMServoDriver pwm, int pin, int min, int max);
-    void write(int pulse);
+    RobotServo(const Adafruit_PWMServoDriver &pwm, const int pin, const int min,
+               const int max);
+    void write(const int pulse);
 
   private:
     int _pin;
