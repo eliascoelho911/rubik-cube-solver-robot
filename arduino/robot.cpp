@@ -50,11 +50,11 @@ void Robot::releaseCube() {
 void Robot::moveCube(const String move) {
     if (move == "L") {
         _lGripper.close();
-        _rGripper.open();
+        _rGripper.close();
         _lHand.move(-1);
     } else if (move == "L'") {
         _lGripper.close();
-        _rGripper.open();
+        _rGripper.close();
         _lHand.move(1);
     }
 }
