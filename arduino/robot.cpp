@@ -27,7 +27,7 @@ void Robot::receiveCube() {
     _rGripper.open();
 
     Serial.println("Place the cube in the robot's");
-    awaitInput("Press any key to continue...");
+    delay(2000);
     Serial.println("Starting to close the grippers...");
 
     _lGripper.close(true);

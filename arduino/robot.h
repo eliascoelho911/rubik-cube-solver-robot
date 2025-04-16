@@ -15,12 +15,13 @@ class Robot {
     void receiveCube();
     void releaseCube();
 
-  private:
-    Adafruit_PWMServoDriver &_pwm;
     LeftHand _lHand;
     RightHand _rHand;
     LeftGripper _lGripper;
     RightGripper _rGripper;
+
+  private:
+    Adafruit_PWMServoDriver &_pwm;
 };
 
 #endif
