@@ -8,12 +8,15 @@ class RobotServo {
     RobotServo(Adafruit_PWMServoDriver &pwm, const int pin, const int min,
                const int max);
     void write(const int pulse);
-    void write(const int pulse, const int startPulse, float speed);
+    void write(const int pulse, float speed);
+
+    int getCurrentPosition() const;
 
   private:
     int _pin;
     int _min;
     int _max;
+    int _currentPosition = -1;
     Adafruit_PWMServoDriver &_pwm;
 };
 

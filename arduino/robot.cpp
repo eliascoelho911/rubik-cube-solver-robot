@@ -11,7 +11,8 @@
 Robot::Robot(Adafruit_PWMServoDriver &pwm, const int lHand, const int rHand,
              const int lGripper, const int rGripper)
     : _pwm(pwm), _lHand(LeftHand(pwm, lHand)), _rHand(RightHand(pwm, rHand)),
-      _lGripper(Gripper(pwm, lGripper)), _rGripper(Gripper(pwm, rGripper)) {}
+      _lGripper(LeftGripper(pwm, lGripper)),
+      _rGripper(RightGripper(pwm, rGripper)) {}
 
 void Robot::begin() {
     _pwm.begin();
@@ -25,13 +26,12 @@ void Robot::receiveCube() {
     _lGripper.open();
     _rGripper.open();
 
-    Serial.println("Place the cube in the robot's hands and await...");
-    delay(2000l);
+    Serial.println("Place the cube in the robot's");
+    awaitInput("Press any key to continue...");
     Serial.println("Starting to close the grippers...");
-    delay(1000l);
 
     _lGripper.close(true);
-    delay(1000l);
+    delay(20l);
     _rGripper.close(true);
 
     Serial.println("Cube positioned!");
@@ -51,10 +51,10 @@ void Robot::moveCube(const String move) {
     if (move == "L") {
         _lGripper.close();
         _rGripper.close();
-        _lHand.move(-1);
+        _lHand.move(-1, true);
     } else if (move == "L'") {
         _lGripper.close();
         _rGripper.close();
-        _lHand.move(1);
+        _lHand.move(1, true);
     }
 }

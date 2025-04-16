@@ -19,8 +19,8 @@ class Robot {
     Adafruit_PWMServoDriver &_pwm;
     LeftHand _lHand;
     RightHand _rHand;
-    Gripper _lGripper;
-    Gripper _rGripper;
+    LeftGripper _lGripper;
+    RightGripper _rGripper;
 };
 
 #endif

@@ -1,27 +1,73 @@
 #include "grippers.h"
+#include "logger.h"
 
-#define CLOSE 360
-#define OPEN 460
+// Definições específicas para a garra esquerda
+#define LEFT_CLOSE 380
+#define LEFT_OPEN 480
+#define LEFT_SLOW_SPEED 0.02f
+#define LEFT_FAST_SPEED 0.1f
+// Definições específicas para a garra direita
+#define RIGHT_CLOSE 370
+#define RIGHT_OPEN 480
+#define RIGHT_SLOW_SPEED 0.02f
+#define RIGHT_FAST_SPEED 0.1f
 
-#define SLOW_SPEED 0.02f
+// Implementação da garra esquerda
+LeftGripper::LeftGripper(Adafruit_PWMServoDriver &pwm, const int pin)
+    : _servo(RobotServo(pwm, pin, LEFT_CLOSE, LEFT_OPEN)) {}
 
-Gripper::Gripper(Adafruit_PWMServoDriver &pwm, const int pin)
-    : _servo(RobotServo(pwm, pin, CLOSE, OPEN)) {}
+LeftGripper::LeftGripper(const RobotServo servo) : _servo(servo) {}
 
-Gripper::Gripper(RobotServo servo) : _servo(servo) {}
+void LeftGripper::open(const bool slow) {
+    Logger *logger = Logger::getInstance();
 
-void Gripper::open(const bool slow) {
     if (slow) {
-        _servo.write(OPEN, CLOSE, SLOW_SPEED);
+        logger->debug("Abrindo garra esquerda lentamente");
+        _servo.write(LEFT_OPEN, LEFT_SLOW_SPEED);
     } else {
-        _servo.write(OPEN);
+        logger->debug("Abrindo garra esquerda rapidamente");
+        _servo.write(LEFT_OPEN, LEFT_FAST_SPEED);
     }
 }
 
-void Gripper::close(const bool slow) {
+void LeftGripper::close(const bool slow) {
+    Logger *logger = Logger::getInstance();
+
     if (slow) {
-        _servo.write(CLOSE, OPEN, SLOW_SPEED);
+        logger->debug("Fechando garra esquerda lentamente");
+        _servo.write(LEFT_CLOSE, LEFT_SLOW_SPEED);
     } else {
-        _servo.write(CLOSE);
+        logger->debug("Fechando garra esquerda rapidamente");
+        _servo.write(LEFT_CLOSE, LEFT_FAST_SPEED);
+    }
+}
+
+// Implementação da garra direita
+RightGripper::RightGripper(Adafruit_PWMServoDriver &pwm, const int pin)
+    : _servo(RobotServo(pwm, pin, RIGHT_CLOSE, RIGHT_OPEN)) {}
+
+RightGripper::RightGripper(const RobotServo servo) : _servo(servo) {}
+
+void RightGripper::open(const bool slow) {
+    Logger *logger = Logger::getInstance();
+
+    if (slow) {
+        logger->debug("Abrindo garra direita lentamente");
+        _servo.write(RIGHT_OPEN, RIGHT_SLOW_SPEED);
+    } else {
+        logger->debug("Abrindo garra direita rapidamente");
+        _servo.write(RIGHT_OPEN, RIGHT_FAST_SPEED);
+    }
+}
+
+void RightGripper::close(const bool slow) {
+    Logger *logger = Logger::getInstance();
+
+    if (slow) {
+        logger->debug("Fechando garra direita lentamente");
+        _servo.write(RIGHT_CLOSE, RIGHT_SLOW_SPEED);
+    } else {
+        logger->debug("Fechando garra direita rapidamente");
+        _servo.write(RIGHT_CLOSE, RIGHT_FAST_SPEED);
     }
 }
