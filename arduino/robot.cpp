@@ -3,22 +3,9 @@
 #include <Adafruit_PWMServoDriver.h>
 #include <Arduino.h>
 
-#define SERVO_FREQ 50
 #define DEFAULT_DELAY 1000
 #define MAX_PULSE 10000
 #define MIN_PULSE 0
-
-Robot::Robot(Adafruit_PWMServoDriver &pwm, const int lHand, const int rHand,
-             const int lGripper, const int rGripper)
-    : _pwm(pwm), _lHand(LeftHand(pwm, lHand)), _rHand(RightHand(pwm, rHand)),
-      _lGripper(LeftGripper(pwm, lGripper)),
-      _rGripper(RightGripper(pwm, rGripper)) {}
-
-void Robot::begin() {
-    _pwm.begin();
-    _pwm.setOscillatorFrequency(27000000);
-    _pwm.setPWMFreq(SERVO_FREQ);
-}
 
 void Robot::receiveCube() {
     _lHand.move(0);

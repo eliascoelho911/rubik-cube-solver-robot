@@ -8,20 +8,28 @@
 
 class Robot {
   public:
-    Robot(Adafruit_PWMServoDriver &pwm, const int lHand, const int rHand,
-          const int lGripper, const int rGripper);
-    void begin();
+    Robot(Adafruit_PWMServoDriver &pwm)
+        : _pwm(pwm), _lHand(Hand::getLeftHand(_pwm)),
+          _rHand(Hand::getRightHand(_pwm)),
+          _lGripper(Gripper::getLeftGripper(_pwm)),
+          _rGripper(Gripper::getRightGripper(_pwm)) {}
+
+    void begin() {
+        _pwm.begin();
+        _pwm.setOscillatorFrequency(27000000);
+        _pwm.setPWMFreq(50);
+    }
+
     void moveCube(const String move);
     void receiveCube();
     void releaseCube();
 
-    LeftHand _lHand;
-    RightHand _rHand;
-    LeftGripper _lGripper;
-    RightGripper _rGripper;
-
   private:
     Adafruit_PWMServoDriver &_pwm;
+    Hand _lHand;
+    Hand _rHand;
+    Gripper _lGripper;
+    Gripper _rGripper;
 };
 
 #endif
