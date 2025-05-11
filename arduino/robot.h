@@ -20,7 +20,7 @@ class Robot {
         _pwm.setPWMFreq(50);
     }
 
-    void moveCube(const String move);
+    void exec(String eventId, String *args);
     void receiveCube();
     void releaseCube();
 
@@ -30,6 +30,7 @@ class Robot {
     Hand _rHand;
     Gripper _lGripper;
     Gripper _rGripper;
+    Logger *logger = Logger::getInstance();
 };
 
 #endif

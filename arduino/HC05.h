@@ -14,9 +14,6 @@ class HC05 {
     long baudRate;
     String buffer;
 
-    bool enterATMode();
-    void exitATMode();
-
   public:
     /**
      * Construtor da classe HC05
@@ -38,23 +35,12 @@ class HC05 {
      */
     HC05(int rx, int tx, long baud = 9600);
 
-    bool begin();
-
     /**
-     * Verifica se o módulo está conectado a algum dispositivo
-     *
-     * @return true se conectado
+     * Destrutor da classe HC05
      */
-    bool isConnected();
+    ~HC05();
 
-    /**
-     * Configura o módulo como escravo (padrão para comunicação com Android)
-     *
-     * @param name Nome do dispositivo Bluetooth
-     * @param pin Código PIN para pareamento (padrão: 1234)
-     * @return true se configurado com sucesso
-     */
-    bool configureAsSlave(String name, String pin = "1234");
+    void begin();
 
     /**
      * Enviar dados pela conexão Bluetooth
