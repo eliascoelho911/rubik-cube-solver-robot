@@ -10,7 +10,7 @@
 #define LEFT_MIDDLE 320
 #define LEFT_FAST_SPEED 0.1f
 #define LEFT_SLOW_SPEED 0.02f
-#define LEFT_HAND_PIN 15
+#define LEFT_HAND_PIN 14
 
 // Definições para a mão direita
 #define RIGHT_MAX 520
@@ -18,7 +18,7 @@
 #define RIGHT_MIDDLE 320
 #define RIGHT_FAST_SPEED 0.1f
 #define RIGHT_SLOW_SPEED 0.02f
-#define RIGHT_HAND_PIN 0
+#define RIGHT_HAND_PIN 1
 
 // Classe base Hand
 class Hand {
@@ -39,12 +39,12 @@ class Hand {
                     RIGHT_SLOW_SPEED, RIGHT_FAST_SPEED);
     }
 
-    void move(const int direction, const bool slow = false) {
+    void rotate(String direction, const bool slow = false) {
         int targetPosition;
-        if (direction > 0) {
-            targetPosition = _min;
-        } else if (direction < 0) {
+        if (direction == "cw") {
             targetPosition = _max;
+        } else if (direction == "cw'") {
+            targetPosition = _min;
         } else {
             targetPosition = _middle;
         }

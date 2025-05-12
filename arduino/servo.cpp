@@ -1,5 +1,4 @@
 #include "servo.h"
-#include "logger.h"
 #include <Adafruit_PWMServoDriver.h>
 #include <Arduino.h>
 #include <Wire.h>

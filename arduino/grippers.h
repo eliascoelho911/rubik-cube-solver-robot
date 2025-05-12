@@ -6,16 +6,15 @@
 #define LEFT_OPEN 480
 #define LEFT_SLOW_SPEED 0.02f
 #define LEFT_FAST_SPEED 0.1f
-#define LEFT_GRIPPER_PIN 14
+#define LEFT_GRIPPER_PIN 15
 
 // Definições específicas para a garra direita
 #define RIGHT_CLOSE 370
 #define RIGHT_OPEN 480
 #define RIGHT_SLOW_SPEED 0.02f
 #define RIGHT_FAST_SPEED 0.1f
-#define RIGHT_GRIPPER_PIN 1
+#define RIGHT_GRIPPER_PIN 0
 
-#include "logger.h"
 #include "servo.h"
 #include <Adafruit_PWMServoDriver.h>
 
@@ -37,22 +36,15 @@ class Gripper {
     }
 
     void open(const bool slow = false) {
-        Logger *logger = Logger::getInstance();
-
         if (slow) {
-            logger->debug("Abrindo garra lentamente");
             _servo.write(LEFT_OPEN, LEFT_SLOW_SPEED);
         } else {
-            logger->debug("Abrindo garra rapidamente");
             _servo.write(LEFT_OPEN, LEFT_FAST_SPEED);
         }
     }
 
     void close(const bool slow = false) {
-        Logger *logger = Logger::getInstance();
-
         if (slow) {
-            logger->debug("Fechando garra lentamente");
             _servo.write(LEFT_CLOSE, LEFT_SLOW_SPEED);
         }
     };

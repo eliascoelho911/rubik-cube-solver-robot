@@ -30,7 +30,6 @@ class Robot {
     Hand _rHand;
     Gripper _lGripper;
     Gripper _rGripper;
-    Logger *logger = Logger::getInstance();
 };
 
 #endif
