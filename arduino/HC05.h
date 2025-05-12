@@ -4,6 +4,9 @@
 #include "Arduino.h"
 #include <SoftwareSerial.h>
 
+// Tamanho do buffer para receber comandos via Bluetooth
+#define BT_BUFFER_SIZE 64
+
 class HC05 {
   private:
     SoftwareSerial *btSerial;
@@ -12,7 +15,10 @@ class HC05 {
     int statePin;
     int enPin;
     long baudRate;
-    String buffer;
+    
+    // Buffer de caracteres estático em vez de String
+    char buffer[BT_BUFFER_SIZE];
+    uint8_t bufferIndex;
 
   public:
     /**
@@ -48,7 +54,7 @@ class HC05 {
      * @param data String de dados a serem enviados
      * @return Número de bytes enviados
      */
-    size_t sendData(String data);
+    size_t sendData(const char* data);
 
     /**
      * Enviar dados em formato binário pela conexão Bluetooth
@@ -76,10 +82,12 @@ class HC05 {
     /**
      * Lê dados disponíveis como uma string
      *
+     * @param buffer Buffer onde os dados serão armazenados
+     * @param maxLength Tamanho máximo do buffer
      * @param endMarker Caractere que marca o fim da mensagem (padrão: '\n')
-     * @return String com os dados lidos ou string vazia se nada disponível
+     * @return Número de bytes lidos
      */
-    String readString(char endMarker = '\n');
+    int readLine(char* buffer, size_t maxLength, char endMarker = '\n');
 
     /**
      * Lê dados para um buffer

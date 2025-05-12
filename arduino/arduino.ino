@@ -1,5 +1,6 @@
 #include "Arduino.h"
 #include "HC05.h"
+#include "commands.h"
 #include "robot.h"
 #include "serial.h"
 #include <Adafruit_PWMServoDriver.h>
@@ -12,17 +13,21 @@ HC05 bt(2, 3, 38400);
 bool isConnected = false;
 bool isReceiving = false;
 
+// Buffer para receber comandos
+char cmdBuffer[BT_BUFFER_SIZE];
+CommandParser parser;
+
 void setup() {
     Serial.begin(9600);
-    Serial.println("Iniciando sistema...");
+    Serial.println(F("Iniciando sistema..."));
 
     robot.begin();
-    Serial.println("Robô inicializado");
+    Serial.println(F("Robô inicializado"));
 
     bt.begin();
 
-    Serial.println("Bluetooth inicializado");
-    Serial.println("Aguardando conexão Bluetooth...");
+    Serial.println(F("Bluetooth inicializado"));
+    Serial.println(F("Aguardando conexão Bluetooth..."));
 
     delay(10);
 }
@@ -31,57 +36,51 @@ void loop() {
     if (bt.available()) {
         isConnected = true;
 
-        String command = bt.readString('\n');
-        command.trim();
-        command.toLowerCase();
+        // Lê comando para o buffer de caracteres
+        int bytesRead = bt.readLine(cmdBuffer, BT_BUFFER_SIZE, '\n');
 
-        Serial.println("Comando recebido: " + command);
-
-        if (command.length() == 0) {
+        if (bytesRead <= 0) {
             return;
         }
 
+        // Converte para minúsculas
+        for (int i = 0; i < bytesRead; i++) {
+            if (cmdBuffer[i] >= 'A' && cmdBuffer[i] <= 'Z') {
+                cmdBuffer[i] = cmdBuffer[i] - 'A' + 'a';
+            }
+        }
+
+        Serial.print(F("Comando recebido: "));
+        Serial.println(cmdBuffer);
+
+        // Processa comandos separados por ponto e vírgula
+        char *currentCommand = cmdBuffer;
+        char *nextCommand = nullptr;
+
         do {
-            int endCommandIndex = command.indexOf(';');
-            String currentCommand = command.substring(0, endCommandIndex);
-            Serial.println("Comando atual: " + currentCommand);
-
-            int separatorIndex = currentCommand.indexOf(':');
-            Serial.println("Índice do separador: " + String(separatorIndex));
-
-            String eventId = getEventId(currentCommand, separatorIndex);
-            Serial.println("ID do evento: " + eventId);
-
-            String *args = getArgs(currentCommand, separatorIndex);
-            Serial.println("Argumentos(" + String(sizeof(args)) + ": ");
-            for (int i = 0; i < sizeof(args); i++) {
-                Serial.println("Arg[" + String(i) + "]: " + args[i]);
-            }
-            Serial.println(")");
-            robot.exec(eventId, args);
-            Serial.println("Comando executado com sucesso");
-
-            if (args != nullptr) {
-                delete[] args;
+            // Encontra o próximo comando
+            nextCommand = strchr(currentCommand, ';');
+            if (nextCommand != nullptr) {
+                *nextCommand =
+                    '\0'; // Substitui o delimitador por terminação de string
+                nextCommand++; // Move para o próximo caractere após o
+                               // delimitador
             }
 
-            if (endCommandIndex >= command.length() - 1) {
-                break;
-            }
+            // Processa o comando atual
+            processCommand(currentCommand);
 
-            command = command.substring(endCommandIndex + 1);
-            command.trim();
+            // Avança para o próximo comando
+            currentCommand = nextCommand;
 
-            Serial.println("Comando restante(" + String(command.length()) +
-                           "): " + command);
-        } while (command.length() > 0);
+        } while (currentCommand != nullptr && *currentCommand != '\0');
 
-        Serial.println("Comando processado com sucesso");
+        Serial.println(F("Comando processado com sucesso"));
         bt.flush();
         Serial.flush();
     } else {
         if (isConnected) {
-            Serial.println("Aguardando comando Bluetooth...");
+            Serial.println(F("Aguardando comando Bluetooth..."));
         }
         isConnected = false;
     }
@@ -89,56 +88,109 @@ void loop() {
     delay(200);
 }
 
-String getEventId(String command, int separatorIndex) {
-    if (separatorIndex < 0) {
-        return "";
+void processCommand(char *cmdStr) {
+    // Inicializa o parser
+    parser.reset();
+
+    Serial.print(F("Processando comando: "));
+    Serial.println(cmdStr);
+
+    // Separa o comando em ID e argumentos
+    char *separator = strchr(cmdStr, ':');
+    if (separator == nullptr) {
+        Serial.println(F("Formato de comando inválido"));
+        return;
     }
-    return command.substring(0, separatorIndex);
+
+    // Substitui o separador por terminação de string
+    *separator = '\0';
+    char *eventId = cmdStr;
+    char *argsStr = separator + 1;
+
+    // Obtém o tipo de comando
+    CommandType cmdType = getCommandTypeFromString(eventId);
+    if (cmdType == CMD_UNKNOWN) {
+        Serial.print(F("Comando desconhecido: "));
+        Serial.println(eventId);
+        return;
+    }
+
+    // Cria a estrutura de comando
+    Command cmd;
+    cmd.type = cmdType;
+
+    // Processa argumentos dependendo do tipo de comando
+    if (cmdType == CMD_MOVE) {
+        // Processa os parâmetros (motor e movimento)
+        // Formato: move:motor,direção
+        char *args[2] = {nullptr, nullptr};
+        parseArgs(argsStr, args, 2);
+
+        if (args[0] == nullptr || args[1] == nullptr) {
+            Serial.println(F("Argumentos insuficientes para comando move"));
+            return;
+        }
+
+        // Obtém o tipo de motor
+        MotorType motorType = getMotorTypeFromString(args[0]);
+        if (motorType == MOTOR_UNKNOWN) {
+            Serial.print(F("Motor desconhecido: "));
+            Serial.println(args[0]);
+            return;
+        }
+
+        cmd.params.moveCmd.motor = motorType;
+
+        // Processa movimento dependendo do tipo de motor
+        if (motorType == MOTOR_LEFT_HAND || motorType == MOTOR_RIGHT_HAND) {
+            HandDirection dir = getHandDirectionFromString(args[1]);
+            if (dir == HAND_DIR_UNKNOWN) {
+                Serial.print(F("Direção desconhecida: "));
+                Serial.println(args[1]);
+                return;
+            }
+            cmd.params.moveCmd.handDir = dir;
+        } else if (motorType == MOTOR_LEFT_GRIPPER ||
+                   motorType == MOTOR_RIGHT_GRIPPER) {
+            GripperAction action = getGripperActionFromString(args[1]);
+            if (action == GRIPPER_UNKNOWN) {
+                Serial.print(F("Ação de garra desconhecida: "));
+                Serial.println(args[1]);
+                return;
+            }
+            cmd.params.moveCmd.gripperAction = action;
+        }
+    }
+
+    // Executa o comando
+    robot.exec(cmd);
+    Serial.println(F("Comando executado com sucesso"));
 }
 
-String *getArgs(String command, int separatorIndex) {
-    Serial.println("Iniciando getArgs");
-    Serial.println("Comando: " + command);
-    Serial.println("Índice do separador: " + String(separatorIndex));
-    if (separatorIndex < 0 || separatorIndex >= command.length() - 1) {
-        String *emptyArray = new String[1];
-        emptyArray[0] = "";
-        return emptyArray;
+// Função para dividir uma string em argumentos separados por vírgula
+void parseArgs(char *argsStr, char **argsArray, uint8_t maxArgs) {
+    uint8_t argCount = 0;
+
+    // Se a string está vazia, retorna sem argumentos
+    if (argsStr == nullptr || *argsStr == '\0') {
+        return;
     }
 
-    String allArgs = command.substring(separatorIndex + 1);
-    allArgs.trim();
-    Serial.println("Todos os argumentos: " + String(allArgs.length()));
+    // O primeiro argumento começa no início da string
+    argsArray[argCount++] = argsStr;
 
-    if (allArgs.length() == 0) {
-        String *emptyArray = new String[1];
-        emptyArray[0] = "";
-        return emptyArray;
-    }
-
-    int count = 1;
-    for (int i = 0; i < allArgs.length(); i++) {
-        if (allArgs[i] == ',') {
-            count++;
+    // Procura por vírgulas e substitui por terminadores de string
+    while (argCount < maxArgs) {
+        char *comma = strchr(argsStr, ',');
+        if (comma == nullptr) {
+            break;
         }
+
+        // Substitui a vírgula por terminador e avança o ponteiro
+        *comma = '\0';
+        argsStr = comma + 1;
+
+        // Armazena o ponteiro para o próximo argumento
+        argsArray[argCount++] = argsStr;
     }
-
-    Serial.println("Número de argumentos: " + String(count));
-
-    String *argsArray = new String[count];
-
-    int start = 0;
-    int arrayIndex = 0;
-
-    for (int i = 0; i <= allArgs.length(); i++) {
-        if (i == allArgs.length() || allArgs[i] == ',') {
-            String arg = allArgs.substring(start, i);
-            arg.trim();
-            argsArray[arrayIndex++] = arg;
-            Serial.println("Arg[" + String(arrayIndex - 1) + "]: " + arg);
-            start = i + 1;
-        }
-    }
-
-    return argsArray;
 }

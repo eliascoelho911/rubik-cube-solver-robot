@@ -8,63 +8,86 @@
 #define MIN_PULSE 0
 
 void Robot::receiveCube() {
-    _lHand.rotate("mid");
-    _rHand.rotate("mid");
+    _lHand.rotate(HAND_DIR_MID);
+    _rHand.rotate(HAND_DIR_MID);
     _lGripper.open();
     _rGripper.open();
 
     delay(2000);
 
     _lGripper.close(true);
-    delay(20l);
+    delay(20);
     _rGripper.close(true);
 }
 
 void Robot::releaseCube() {
-    _lHand.rotate("mid");
-    _rHand.rotate("mid");
+    _lHand.rotate(HAND_DIR_MID);
+    _rHand.rotate(HAND_DIR_MID);
     _lGripper.open();
     _rGripper.open();
 }
 
-void Robot::exec(String eventId, String *args) {
-    if (eventId == "move") {
-        String motorId = args[0];
-        String movement = args[1];
-
-        motorId.trim();
-        movement.trim();
-
-        Hand *hand = nullptr;
-        Gripper *gripper = nullptr;
-        if (motorId == "hl") {
-            hand = &_lHand;
-        } else if (motorId == "hr") {
-            hand = &_rHand;
-        } else if (motorId == "gl") {
-            gripper = &_lGripper;
-        } else if (motorId == "gr") {
-            gripper = &_rGripper;
-        }
-        if (hand != nullptr) {
-            Serial.println("Movendo mão " + motorId + " para " + movement);
-            hand->rotate(movement, true);
-        } else if (gripper != nullptr) {
-            if (movement == "open") {
-                gripper->open(true);
-            } else if (movement == "close") {
-                gripper->close(true);
-            } else {
-                Serial.println("Movimento de garra inválido: " + movement);
+void Robot::exec(Command cmd) {
+    switch (cmd.type) {
+        case CMD_MOVE: {
+            MotorType motorType = cmd.params.moveCmd.motor;
+            
+            // Verificar se é mão ou garra
+            if (motorType == MOTOR_LEFT_HAND || motorType == MOTOR_RIGHT_HAND) {
+                Hand* hand = nullptr;
+                
+                if (motorType == MOTOR_LEFT_HAND) {
+                    hand = &_lHand;
+                    Serial.print(F("Movendo mão esquerda para "));
+                } else {
+                    hand = &_rHand;
+                    Serial.print(F("Movendo mão direita para "));
+                }
+                
+                HandDirection dir = cmd.params.moveCmd.handDir;
+                Serial.println(getHandDirectionString(dir));
+                
+                if (hand != nullptr) {
+                    hand->rotate(dir, true);
+                }
             }
+            else if (motorType == MOTOR_LEFT_GRIPPER || motorType == MOTOR_RIGHT_GRIPPER) {
+                Gripper* gripper = nullptr;
+                
+                if (motorType == MOTOR_LEFT_GRIPPER) {
+                    gripper = &_lGripper;
+                    Serial.print(F("Movendo garra esquerda para "));
+                } else {
+                    gripper = &_rGripper;
+                    Serial.print(F("Movendo garra direita para "));
+                }
+                
+                GripperAction action = cmd.params.moveCmd.gripperAction;
+                Serial.println(getGripperActionString(action));
+                
+                if (gripper != nullptr) {
+                    if (action == GRIPPER_OPEN) {
+                        gripper->open(true);
+                    } else if (action == GRIPPER_CLOSE) {
+                        gripper->close(true);
+                    } else {
+                        Serial.println(F("Movimento de garra inválido"));
+                    }
+                }
+            }
+            break;
         }
-    } else if (eventId == "receive") {
-        receiveCube();
-    } else if (eventId == "release") {
-        releaseCube();
-    } else {
-        Serial.println("Comando com evento " + eventId + " inválido");
+        
+        case CMD_RECEIVE:
+            receiveCube();
+            break;
+            
+        case CMD_RELEASE:
+            releaseCube();
+            break;
+            
+        default:
+            Serial.println(F("Comando inválido"));
+            break;
     }
-    delete[] args;
-    args = nullptr;
 }

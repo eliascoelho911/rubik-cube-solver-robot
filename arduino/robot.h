@@ -1,6 +1,7 @@
 #ifndef ROBOT_H
 #define ROBOT_H
 
+#include "commands.h"
 #include "grippers.h"
 #include "hands.h"
 #include <Adafruit_PWMServoDriver.h>
@@ -20,7 +21,8 @@ class Robot {
         _pwm.setPWMFreq(50);
     }
 
-    void exec(String eventId, String *args);
+    // Versão otimizada usando enum
+    void exec(Command cmd);
     void receiveCube();
     void releaseCube();
 

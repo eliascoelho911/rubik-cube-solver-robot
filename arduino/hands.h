@@ -1,6 +1,7 @@
 #ifndef HANDS_H
 #define HANDS_H
 
+#include "commands.h"
 #include "servo.h"
 #include <Adafruit_PWMServoDriver.h>
 
@@ -39,14 +40,20 @@ class Hand {
                     RIGHT_SLOW_SPEED, RIGHT_FAST_SPEED);
     }
 
-    void rotate(String direction, const bool slow = false) {
+    // Método otimizado usando enum
+    void rotate(HandDirection direction, const bool slow = false) {
         int targetPosition;
-        if (direction == "cw") {
-            targetPosition = _max;
-        } else if (direction == "cw'") {
-            targetPosition = _min;
-        } else {
-            targetPosition = _middle;
+        switch (direction) {
+            case HAND_DIR_CW:
+                targetPosition = _max;
+                break;
+            case HAND_DIR_CCW:
+                targetPosition = _min;
+                break;
+            case HAND_DIR_MID:
+            default:
+                targetPosition = _middle;
+                break;
         }
 
         if (slow) {

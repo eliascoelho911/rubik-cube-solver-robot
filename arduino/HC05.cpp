@@ -7,7 +7,8 @@ HC05::HC05(int rx, int tx, int state, int en, long baud) {
     enPin = en;
     baudRate = baud;
     btSerial = new SoftwareSerial(rxPin, txPin);
-    buffer = "";
+    buffer[0] = '\0';
+    bufferIndex = 0;
 }
 
 HC05::HC05(int rx, int tx, long baud) {
@@ -17,18 +18,20 @@ HC05::HC05(int rx, int tx, long baud) {
     enPin = -1;
     baudRate = baud;
     btSerial = new SoftwareSerial(rxPin, txPin);
-    buffer = "";
+    buffer[0] = '\0';
+    bufferIndex = 0;
 }
 
 HC05::~HC05() { delete btSerial; }
 
 void HC05::begin() {
     btSerial->begin(baudRate);
-
     delay(500);
 }
 
-size_t HC05::sendData(String data) { return btSerial->print(data); }
+size_t HC05::sendData(const char* data) { 
+    return btSerial->print(data); 
+}
 
 size_t HC05::sendData(uint8_t *buffer, size_t size) {
     return btSerial->write(buffer, size);
@@ -38,25 +41,27 @@ int HC05::available() { return btSerial->available(); }
 
 int HC05::read() { return btSerial->read(); }
 
-String HC05::readString(char endMarker) {
-    String receivedString = "";
+int HC05::readLine(char* buffer, size_t maxLength, char endMarker) {
     unsigned long startTime = millis();
-    bool stringComplete = false;
-
-    // Timeout de 1 segundo ou até receber o marcador de final
-    while (millis() - startTime < 1000 && !stringComplete) {
+    bool lineComplete = false;
+    size_t charCount = 0;
+    
+    // Limite máximo de tempo de 1 segundo ou até receber o marcador final
+    while ((millis() - startTime < 1000) && !lineComplete && (charCount < maxLength - 1)) {
         if (btSerial->available() > 0) {
             char inChar = (char)btSerial->read();
-            receivedString += inChar;
-
+            buffer[charCount++] = inChar;
+            
             // Verifica se é o final da mensagem
             if (inChar == endMarker) {
-                stringComplete = true;
+                lineComplete = true;
             }
         }
     }
-
-    return receivedString;
+    
+    // Garante que a string seja terminada corretamente
+    buffer[charCount] = '\0';
+    return charCount;
 }
 
 size_t HC05::readBytes(uint8_t *buffer, size_t length) {
@@ -80,6 +85,10 @@ void HC05::flush() {
     while (btSerial->available()) {
         btSerial->read();
     }
+    
+    // Limpa o buffer interno
+    buffer[0] = '\0';
+    bufferIndex = 0;
 }
 
 SoftwareSerial *HC05::getSerial() { return btSerial; }

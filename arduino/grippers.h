@@ -1,6 +1,10 @@
 #ifndef GRIPPERS_H
 #define GRIPPERS_H
 
+#include "commands.h"
+#include "servo.h"
+#include <Adafruit_PWMServoDriver.h>
+
 // Definições específicas para a garra esquerda
 #define LEFT_CLOSE 380
 #define LEFT_OPEN 480
@@ -14,9 +18,6 @@
 #define RIGHT_SLOW_SPEED 0.02f
 #define RIGHT_FAST_SPEED 0.1f
 #define RIGHT_GRIPPER_PIN 0
-
-#include "servo.h"
-#include <Adafruit_PWMServoDriver.h>
 
 class Gripper {
   public:
@@ -35,19 +36,44 @@ class Gripper {
                        RIGHT_SLOW_SPEED, RIGHT_FAST_SPEED);
     }
 
+    // Estas funções foram mantidas para compatibilidade com o código existente
     void open(const bool slow = false) {
         if (slow) {
-            _servo.write(LEFT_OPEN, LEFT_SLOW_SPEED);
+            _servo.write(_open, _slowSpeed);
         } else {
-            _servo.write(LEFT_OPEN, LEFT_FAST_SPEED);
+            _servo.write(_open, _fastSpeed);
         }
     }
 
     void close(const bool slow = false) {
         if (slow) {
-            _servo.write(LEFT_CLOSE, LEFT_SLOW_SPEED);
+            _servo.write(_close, _slowSpeed);
+        } else {
+            _servo.write(_close, _fastSpeed);
         }
-    };
+    }
+
+    // Função otimizada que usa enum
+    void move(GripperAction action, const bool slow = false) {
+        int targetPosition;
+        
+        switch (action) {
+            case GRIPPER_OPEN:
+                targetPosition = _open;
+                break;
+            case GRIPPER_CLOSE:
+                targetPosition = _close;
+                break;
+            default:
+                return; // Ação inválida
+        }
+        
+        if (slow) {
+            _servo.write(targetPosition, _slowSpeed);
+        } else {
+            _servo.write(targetPosition, _fastSpeed);
+        }
+    }
 
   private:
     RobotServo _servo;
