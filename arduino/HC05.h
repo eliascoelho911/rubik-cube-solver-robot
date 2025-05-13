@@ -15,7 +15,7 @@ class HC05 {
     int statePin;
     int enPin;
     long baudRate;
-    
+
     // Buffer de caracteres estático em vez de String
     char buffer[BT_BUFFER_SIZE];
     uint8_t bufferIndex;
@@ -54,7 +54,7 @@ class HC05 {
      * @param data String de dados a serem enviados
      * @return Número de bytes enviados
      */
-    size_t sendData(const char* data);
+    size_t sendData(const char *data);
 
     /**
      * Enviar dados em formato binário pela conexão Bluetooth
@@ -87,7 +87,7 @@ class HC05 {
      * @param endMarker Caractere que marca o fim da mensagem (padrão: '\n')
      * @return Número de bytes lidos
      */
-    int readLine(char* buffer, size_t maxLength, char endMarker = '\n');
+    int readLine(char *buffer, size_t maxLength, char endMarker = '\n');
 
     /**
      * Lê dados para um buffer

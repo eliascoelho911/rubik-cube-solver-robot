@@ -44,16 +44,16 @@ class Hand {
     void rotate(HandDirection direction, const bool slow = false) {
         int targetPosition;
         switch (direction) {
-            case HAND_DIR_CW:
-                targetPosition = _max;
-                break;
-            case HAND_DIR_CCW:
-                targetPosition = _min;
-                break;
-            case HAND_DIR_MID:
-            default:
-                targetPosition = _middle;
-                break;
+        case HAND_DIR_CW:
+            targetPosition = _max;
+            break;
+        case HAND_DIR_CCW:
+            targetPosition = _min;
+            break;
+        case HAND_DIR_MID:
+        default:
+            targetPosition = _middle;
+            break;
         }
 
         if (slow) {

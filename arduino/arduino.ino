@@ -44,9 +44,14 @@ void loop() {
         }
 
         // Converte para minúsculas
+        int commands = 0;
+
         for (int i = 0; i < bytesRead; i++) {
             if (cmdBuffer[i] >= 'A' && cmdBuffer[i] <= 'Z') {
                 cmdBuffer[i] = cmdBuffer[i] - 'A' + 'a';
+            }
+            if (cmdBuffer[i] == ';') {
+                commands++;
             }
         }
 
@@ -57,7 +62,7 @@ void loop() {
         char *currentCommand = cmdBuffer;
         char *nextCommand = nullptr;
 
-        do {
+        for (int i = 0; i < commands; i++) {
             // Encontra o próximo comando
             nextCommand = strchr(currentCommand, ';');
             if (nextCommand != nullptr) {
@@ -72,8 +77,7 @@ void loop() {
 
             // Avança para o próximo comando
             currentCommand = nextCommand;
-
-        } while (currentCommand != nullptr && *currentCommand != '\0');
+        }
 
         Serial.println(F("Comando processado com sucesso"));
         bt.flush();

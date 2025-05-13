@@ -56,18 +56,18 @@ class Gripper {
     // Função otimizada que usa enum
     void move(GripperAction action, const bool slow = false) {
         int targetPosition;
-        
+
         switch (action) {
-            case GRIPPER_OPEN:
-                targetPosition = _open;
-                break;
-            case GRIPPER_CLOSE:
-                targetPosition = _close;
-                break;
-            default:
-                return; // Ação inválida
+        case GRIPPER_OPEN:
+            targetPosition = _open;
+            break;
+        case GRIPPER_CLOSE:
+            targetPosition = _close;
+            break;
+        default:
+            return; // Ação inválida
         }
-        
+
         if (slow) {
             _servo.write(targetPosition, _slowSpeed);
         } else {

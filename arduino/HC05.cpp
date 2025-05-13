@@ -29,9 +29,7 @@ void HC05::begin() {
     delay(500);
 }
 
-size_t HC05::sendData(const char* data) { 
-    return btSerial->print(data); 
-}
+size_t HC05::sendData(const char *data) { return btSerial->print(data); }
 
 size_t HC05::sendData(uint8_t *buffer, size_t size) {
     return btSerial->write(buffer, size);
@@ -41,24 +39,25 @@ int HC05::available() { return btSerial->available(); }
 
 int HC05::read() { return btSerial->read(); }
 
-int HC05::readLine(char* buffer, size_t maxLength, char endMarker) {
+int HC05::readLine(char *buffer, size_t maxLength, char endMarker) {
     unsigned long startTime = millis();
     bool lineComplete = false;
     size_t charCount = 0;
-    
+
     // Limite máximo de tempo de 1 segundo ou até receber o marcador final
-    while ((millis() - startTime < 1000) && !lineComplete && (charCount < maxLength - 1)) {
+    while ((millis() - startTime < 1000) && !lineComplete &&
+           (charCount < maxLength - 1)) {
         if (btSerial->available() > 0) {
             char inChar = (char)btSerial->read();
             buffer[charCount++] = inChar;
-            
+
             // Verifica se é o final da mensagem
             if (inChar == endMarker) {
                 lineComplete = true;
             }
         }
     }
-    
+
     // Garante que a string seja terminada corretamente
     buffer[charCount] = '\0';
     return charCount;
@@ -85,7 +84,7 @@ void HC05::flush() {
     while (btSerial->available()) {
         btSerial->read();
     }
-    
+
     // Limpa o buffer interno
     buffer[0] = '\0';
     bufferIndex = 0;
