@@ -80,7 +80,6 @@ void loop() {
         }
 
         Serial.println(F("Comando processado com sucesso"));
-        bt.flush();
         Serial.flush();
     } else {
         if (isConnected) {
@@ -89,7 +88,7 @@ void loop() {
         isConnected = false;
     }
 
-    delay(200);
+    delay(20);
 }
 
 void processCommand(char *cmdStr) {
