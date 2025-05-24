@@ -77,6 +77,9 @@ void loop() {
 
             // Avança para o próximo comando
             currentCommand = nextCommand;
+
+            Serial.print(F("Próximo comando: "));
+            Serial.println(nextCommand);
         }
 
         Serial.println(F("Comando processado com sucesso"));

@@ -6,14 +6,14 @@
 #include <Adafruit_PWMServoDriver.h>
 
 // Definições específicas para a garra esquerda
-#define LEFT_CLOSE 380
+#define LEFT_CLOSE 385
 #define LEFT_OPEN 480
 #define LEFT_SLOW_SPEED 0.02f
 #define LEFT_FAST_SPEED 0.1f
 #define LEFT_GRIPPER_PIN 15
 
 // Definições específicas para a garra direita
-#define RIGHT_CLOSE 370
+#define RIGHT_CLOSE 365
 #define RIGHT_OPEN 480
 #define RIGHT_SLOW_SPEED 0.02f
 #define RIGHT_FAST_SPEED 0.1f

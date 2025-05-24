@@ -45,7 +45,7 @@ int HC05::readLine(char *buffer, size_t maxLength, char endMarker) {
     size_t charCount = 0;
 
     // Limite máximo de tempo de 1 segundo ou até receber o marcador final
-    while ((millis() - startTime < 1000) && !lineComplete &&
+    while ((millis() - startTime < 2000) && !lineComplete &&
            (charCount < maxLength - 1)) {
         if (btSerial->available() > 0) {
             char inChar = (char)btSerial->read();
@@ -55,6 +55,8 @@ int HC05::readLine(char *buffer, size_t maxLength, char endMarker) {
             if (inChar == endMarker) {
                 lineComplete = true;
             }
+        } else {
+            delay(10);
         }
     }
 

@@ -6,16 +6,16 @@
 #include <Adafruit_PWMServoDriver.h>
 
 // Definições para a mão esquerda
-#define LEFT_MAX 530
-#define LEFT_MIN 130
+#define LEFT_MAX 525
+#define LEFT_MIN 105
 #define LEFT_MIDDLE 320
 #define LEFT_FAST_SPEED 0.1f
 #define LEFT_SLOW_SPEED 0.02f
 #define LEFT_HAND_PIN 14
 
 // Definições para a mão direita
-#define RIGHT_MAX 505
-#define RIGHT_MIN 120
+#define RIGHT_MAX 525
+#define RIGHT_MIN 105
 #define RIGHT_MIDDLE 320
 #define RIGHT_FAST_SPEED 0.1f
 #define RIGHT_SLOW_SPEED 0.02f

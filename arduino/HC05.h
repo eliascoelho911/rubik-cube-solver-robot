@@ -5,7 +5,7 @@
 #include <SoftwareSerial.h>
 
 // Tamanho do buffer para receber comandos via Bluetooth
-#define BT_BUFFER_SIZE 64
+#define BT_BUFFER_SIZE 72
 
 class HC05 {
   private:
