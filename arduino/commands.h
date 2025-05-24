@@ -59,10 +59,8 @@ struct Command {
     union {
         struct {
             MotorType motor;
-            union {
-                HandDirection handDir;
-                GripperAction gripperAction;
-            };
+            int pulse;
+            float speed;
         } moveCmd;
     } params;
 };
@@ -79,9 +77,9 @@ const char *getMotorTypeString(MotorType motor);
 const char *getHandDirectionString(HandDirection dir);
 const char *getGripperActionString(GripperAction action);
 
-// Estrutura para decodificação de comandos da forma cmd:param1,param2
+// Estrutura para decodificação de comandos da forma cmd:param1,param2,param3
 #define MAX_CMD_LEN 16
-#define MAX_ARGS 2
+#define MAX_ARGS 3
 
 struct CommandParser {
     char cmdBuffer[MAX_CMD_LEN];
@@ -93,6 +91,7 @@ struct CommandParser {
         cmdBuffer[0] = '\0';
         args[0][0] = '\0';
         args[1][0] = '\0';
+        args[2][0] = '\0';
         numArgs = 0;
     }
 };

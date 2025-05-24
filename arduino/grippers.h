@@ -75,6 +75,11 @@ class Gripper {
         }
     }
 
+    // Novo método para usar pulse e speed diretamente
+    void moveTo(int pulse, float speed) {
+        _servo.write(pulse, speed);
+    }
+
   private:
     RobotServo _servo;
     int _open;

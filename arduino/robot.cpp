@@ -31,6 +31,15 @@ void Robot::exec(Command cmd) {
     switch (cmd.type) {
     case CMD_MOVE: {
         MotorType motorType = cmd.params.moveCmd.motor;
+        int pulse = cmd.params.moveCmd.pulse;
+        float speed = cmd.params.moveCmd.speed;
+
+        Serial.print(F("Movendo motor "));
+        Serial.print(getMotorTypeString(motorType));
+        Serial.print(F(" para pulse "));
+        Serial.print(pulse);
+        Serial.print(F(" com speed "));
+        Serial.println(speed);
 
         // Verificar se é mão ou garra
         if (motorType == MOTOR_LEFT_HAND || motorType == MOTOR_RIGHT_HAND) {
@@ -42,10 +51,8 @@ void Robot::exec(Command cmd) {
                 hand = &_rHand;
             }
 
-            HandDirection dir = cmd.params.moveCmd.handDir;
-
             if (hand != nullptr) {
-                hand->rotate(dir, true);
+                hand->moveTo(pulse, speed);
             }
         } else if (motorType == MOTOR_LEFT_GRIPPER ||
                    motorType == MOTOR_RIGHT_GRIPPER) {
@@ -57,17 +64,8 @@ void Robot::exec(Command cmd) {
                 gripper = &_rGripper;
             }
 
-            GripperAction action = cmd.params.moveCmd.gripperAction;
-            Serial.println(getGripperActionString(action));
-
             if (gripper != nullptr) {
-                if (action == GRIPPER_OPEN) {
-                    gripper->open(true);
-                } else if (action == GRIPPER_CLOSE) {
-                    gripper->close(true);
-                } else {
-                    Serial.println(F("Movimento de garra inválido"));
-                }
+                gripper->moveTo(pulse, speed);
             }
         }
         break;

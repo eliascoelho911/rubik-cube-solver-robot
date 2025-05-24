@@ -63,6 +63,11 @@ class Hand {
         }
     }
 
+    // Novo método para usar pulse e speed diretamente
+    void moveTo(int pulse, float speed) {
+        _servo.write(pulse, speed);
+    }
+
     bool isMaxPosition() { return _servo.getCurrentPosition() == _max; }
     bool isMinPosition() { return _servo.getCurrentPosition() == _min; }
     bool isMiddlePosition() { return _servo.getCurrentPosition() == _middle; }

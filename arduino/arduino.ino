@@ -127,12 +127,12 @@ void processCommand(char *cmdStr) {
 
     // Processa argumentos dependendo do tipo de comando
     if (cmdType == CMD_MOVE) {
-        // Processa os parâmetros (motor e movimento)
-        // Formato: move:motor,direção
-        char *args[2] = {nullptr, nullptr};
-        parseArgs(argsStr, args, 2);
+        // Processa os parâmetros (motor, pulse e speed)
+        // Formato: move:motor,pulse,speed
+        char *args[3] = {nullptr, nullptr, nullptr};
+        parseArgs(argsStr, args, 3);
 
-        if (args[0] == nullptr || args[1] == nullptr) {
+        if (args[0] == nullptr || args[1] == nullptr || args[2] == nullptr) {
             Serial.println(F("Argumentos insuficientes para comando move"));
             return;
         }
@@ -145,27 +145,25 @@ void processCommand(char *cmdStr) {
             return;
         }
 
-        cmd.params.moveCmd.motor = motorType;
-
-        // Processa movimento dependendo do tipo de motor
-        if (motorType == MOTOR_LEFT_HAND || motorType == MOTOR_RIGHT_HAND) {
-            HandDirection dir = getHandDirectionFromString(args[1]);
-            if (dir == HAND_DIR_UNKNOWN) {
-                Serial.print(F("Direção desconhecida: "));
-                Serial.println(args[1]);
-                return;
-            }
-            cmd.params.moveCmd.handDir = dir;
-        } else if (motorType == MOTOR_LEFT_GRIPPER ||
-                   motorType == MOTOR_RIGHT_GRIPPER) {
-            GripperAction action = getGripperActionFromString(args[1]);
-            if (action == GRIPPER_UNKNOWN) {
-                Serial.print(F("Ação de garra desconhecida: "));
-                Serial.println(args[1]);
-                return;
-            }
-            cmd.params.moveCmd.gripperAction = action;
+        // Converte pulse para inteiro
+        int pulse = atoi(args[1]);
+        if (pulse < 0 || pulse > 4095) {
+            Serial.print(F("Pulse inválido (0-4095): "));
+            Serial.println(pulse);
+            return;
         }
+
+        // Converte speed para float
+        float speed = atof(args[2]);
+        if (speed < 0.0 || speed > 1.0) {
+            Serial.print(F("Speed inválido (0.0-1.0): "));
+            Serial.println(speed);
+            return;
+        }
+
+        cmd.params.moveCmd.motor = motorType;
+        cmd.params.moveCmd.pulse = pulse;
+        cmd.params.moveCmd.speed = speed;
     }
 
     // Executa o comando
